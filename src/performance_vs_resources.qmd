@@ -1,0 +1,176 @@
+---
+title: "Are Bayern Munich Good or is the Bundesliga Bad? Measuring Performance Conditional on Resources Using a Bayesian Multilevel Regression"
+author: "Paul Johnson"
+format: html
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+library(dplyr)
+library(ggplot2)
+library(rstanarm)
+library(brms)
+
+theme_set(theme_minimal())
+
+club_resources <- readr::read_rds(here::here("data", "club_resources.rds"))
+
+```
+
+## Exploratory Data Analysis
+
+```{r squad-values}
+# comparing squad values in each league over time
+club_resources %>%
+  group_by(league, season) %>%
+  summarise(value = median(value)) %>%
+  ggplot(aes(season, value, group = league, fill = league)) +
+  geom_col(position = "dodge") +
+  scale_fill_viridis_d()
+```
+
+```{r transfer-spending}
+
+club_resources %>%
+  filter(season != 2022) %>%
+  ggplot(aes(pts, net_spend, colour = league)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  scale_colour_viridis_d() +
+  scale_y_continuous(labels = scales::label_comma()) +
+  facet_wrap(~ league)
+```
+
+-   The number of players seems to have a negative correlation with points (this is itself relatively interesting), but I suspect it is a relevant control variable.
+
+```{r squad-size}
+
+club_resources %>%
+  filter(season != 2022) %>%
+  ggplot(aes(pts, num_players, colour = league)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  scale_colour_viridis_d() +
+  facet_wrap(~ league)
+
+```
+
+-   The number of games missed through injury is clearly a function of the number of games a team plays each season, and because the injury data appears to include **all** games missed, not just league games, there is a positive relationship between points and games missed to injury.
+-   As a result, I've used days_injured instead, which is an imperfect measure of the effect injuries have on a team, but at least will not be a function of a team's success in non-league competitions.
+
+```{r injuries}
+
+club_resources %>%
+  filter(season != 2022) %>%
+  ggplot(aes(pts, days_injured/num_players, colour = league)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  scale_colour_viridis_d() +
+  facet_wrap(~ league)
+
+```
+
+-   One of the most noticeable details that you can identify from the EDA is that there appears to be not only a different intercept for each league, but also the slope differs too. This is not entirely surprising, but it wasn't my initial working assumption. I was starting from an assumption that the differences would be based on leagues having different intercepts.
+
+-   Is there also a non-linear trend in certain leagues? There does look like there might be an exponential relationship between market value and points. This may exist across all leagues, it's just that some league don't have such large disparities that that trend shows up?
+
+-   I need to facet the leagues to look at them individually as well.
+
+```{r pts-and-values}
+  
+club_resources %>%
+  filter(season != 2022) %>%
+  ggplot(aes(pts, value, colour = league)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  scale_colour_viridis_d() +
+  scale_y_continuous(labels = scales::label_comma())
+
+club_resources %>%
+  filter(season != 2022) %>%
+  ggplot(aes(pts, log(value), colour = league)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  scale_colour_viridis_d() +
+  scale_y_continuous(labels = scales::label_comma()) +
+  facet_wrap(~ league)
+
+```
+
+## Modelling Process
+
+Standardizing and centering the data
+
+```{r}
+
+model_df <- 
+  club_resources %>%
+  mutate(
+    value = (value - mean(value))/sd(value),
+    pts = (pts - mean(pts))/sd(pts),
+    net_spend = (net_spend - mean(net_spend))/sd(net_spend),
+    num_players = (num_players - mean(num_players))/sd(num_players),
+    days_injured = (days_injured - mean(days_injured))/sd(days_injured)
+    )
+
+```
+
+### Simple Models
+
+```{r intercept-model}
+intercept_glm <-
+  brm(pts ~ 1 + (1 | league),
+      data = model_df)  
+
+summary(intercept_glm)
+
+intercept_R2 <- loo_R2(intercept_glm)
+
+intercept_R2
+
+```
+
+```{r simple-model}
+
+value_glm <- stan_glm(pts ~ value + days_injured + num_players, data = model_df)
+
+summary(value_glm)
+
+value_R2 <- loo_R2(value_glm)
+
+as_tibble(value_R2) %>%
+  ggplot(aes(value)) +
+  geom_density()
+
+```
+
+The Loo $R^2$ is much better for the glm model that includes all the relevant variables than the intercept only model. This is to be expected, but it does help to check these things!
+
+
+We can also carry out some diagnostic checks and some posterior predictive checks.
+
+```{r}
+
+bayesplot::mcmc_trace(value_glm)
+
+bayesplot::ppc_dens_overlay(y = model_df$pts, yrep = value_glm)
+
+plot(value_glm, "hist")
+
+```
+
+## Multilevel Regression
+
+```{r mlm}
+fit1 <- brm(pts ~ log(value) + days_injured + num_players + league + (1|league),
+            data = model_df)
+
+bayesplot::mcmc_trace(fit1)
+```
+
+## Simulations
+
+```{r sims}
+
+```
