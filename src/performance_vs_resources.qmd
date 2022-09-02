@@ -7,10 +7,12 @@ editor_options:
 ---
 
 ```{r setup}
-library(dplyr)
-library(ggplot2)
-library(rstanarm)
-library(brms)
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(ggplot2)
+  library(rstanarm)
+  library(brms)
+})
 
 theme_set(theme_minimal())
 
@@ -18,7 +20,26 @@ club_resources <- readr::read_rds(here::here("data", "club_resources.rds"))
 
 ```
 
-## Exploratory Data Analysis
+# Exploratory Data Analysis
+
+```{r pts}
+
+club_resources %>%
+  ggplot(aes(pts)) +
+  geom_histogram()
+
+club_resources %>%
+  ggplot(aes(pts, fill = league)) +
+  geom_histogram() +
+  scale_fill_viridis_d()
+
+club_resources %>%
+  ggplot(aes(pts, fill = league)) +
+  geom_histogram(binwidth = 5) +
+  scale_fill_viridis_d() +
+  facet_wrap(~ league)
+
+```
 
 ```{r squad-values}
 # comparing squad values in each league over time
@@ -45,6 +66,19 @@ club_resources %>%
 -   The number of players seems to have a negative correlation with points (this is itself relatively interesting), but I suspect it is a relevant control variable.
 
 ```{r squad-size}
+
+club_resources %>%
+  filter(season != 2022) %>%
+  ggplot(aes(pts, num_players)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+club_resources %>%
+  filter(season != 2022) %>%
+  ggplot(aes(pts, num_players, colour = league)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  scale_colour_viridis_d()
 
 club_resources %>%
   filter(season != 2022) %>%
@@ -77,18 +111,18 @@ club_resources %>%
 
 -   I need to facet the leagues to look at them individually as well.
 
+-   When log-transformed, there doesn't appear to be a massive difference in the slopes of each league, except for the Austrian Bundesliga, and Ligue 1. However, I'm not sure the difference is big enough to make it worth modelling varying slopes.
+
 ```{r pts-and-values}
   
 club_resources %>%
-  filter(season != 2022) %>%
-  ggplot(aes(pts, value, colour = league)) +
+  ggplot(aes(pts, log(value), colour = league)) +
   geom_point() +
   geom_smooth(method = "lm") +
   scale_colour_viridis_d() +
   scale_y_continuous(labels = scales::label_comma())
 
 club_resources %>%
-  filter(season != 2022) %>%
   ggplot(aes(pts, log(value), colour = league)) +
   geom_point() +
   geom_smooth(method = "lm") +
@@ -98,46 +132,49 @@ club_resources %>%
 
 ```
 
-## Modelling Process
+# Preparing Data for Modelling
 
-Standardizing and centering the data
+-   Some basic transformations and type changes of variables to make sure the data is ready for modelling
 
-```{r}
+```{r data-prep}
+
+club_resources <-
+  club_resources %>%
+  mutate(
+    weighted_injuries = days_injured/num_players,
+    log_value = log(value)
+  )
 
 model_df <- 
   club_resources %>%
   mutate(
+    league = forcats::as_factor(league),
+    season = forcats::as_factor(season),
+    squad = forcats::as_factor(squad),
+    log_value = (log_value - mean(log_value))/sd(log_value),
     value = (value - mean(value))/sd(value),
     pts = (pts - mean(pts))/sd(pts),
     net_spend = (net_spend - mean(net_spend))/sd(net_spend),
     num_players = (num_players - mean(num_players))/sd(num_players),
-    days_injured = (days_injured - mean(days_injured))/sd(days_injured)
+    days_injured = (days_injured - mean(days_injured))/sd(days_injured),
+    weighted_injuries = (weighted_injuries - mean(weighted_injuries))/sd(weighted_injuries)
     )
 
 ```
 
-### Simple Models
+# Regression Models as Building Blocks
 
-```{r intercept-model}
-intercept_glm <-
-  brm(pts ~ 1 + (1 | league),
-      data = model_df)  
+## Simple Linear Model with Squad Value Predictor
 
-summary(intercept_glm)
+```{r simple-glm}
 
-intercept_R2 <- loo_R2(intercept_glm)
-
-intercept_R2
-
-```
-
-```{r simple-model}
-
-value_glm <- stan_glm(pts ~ value + days_injured + num_players, data = model_df)
+value_glm <- stan_glm(pts ~ log_value, data = model_df)
 
 summary(value_glm)
 
 value_R2 <- loo_R2(value_glm)
+
+median(value_R2)
 
 as_tibble(value_R2) %>%
   ggplot(aes(value)) +
@@ -145,31 +182,135 @@ as_tibble(value_R2) %>%
 
 ```
 
-The Loo $R^2$ is much better for the glm model that includes all the relevant variables than the intercept only model. This is to be expected, but it does help to check these things!
+The Loo $R^2$ is much better for the regression including squad values than the intercept only regression. This is to be expected, but it does help to check these things!
 
+The multivariate regression including all potential explanatory variables is also a little better than the model that only contains the squad values as a predictor.  The improvement isn't huge, but it's significant enough to suggest there's value in including some of those variables.
+
+## Multivariable Linear Model
+
+```{r multivariable-glm}
+
+multivariable_glm <- stan_glm(pts ~ value + days_injured + num_players, data = model_df)
+
+summary(multivariate_glm)
+
+multivariate_R2 <- loo_R2(multivariate_glm)
+
+median(multivariate_R2)
+
+as_tibble(multivariate_R2) %>%
+  ggplot(aes(value)) +
+  geom_density()
+
+```
 
 We can also carry out some diagnostic checks and some posterior predictive checks.
 
-```{r}
+```{r glm-diagnostics}
 
-bayesplot::mcmc_trace(value_glm)
+bayesplot::mcmc_trace(multivariate_glm)
 
-bayesplot::ppc_dens_overlay(y = model_df$pts, yrep = value_glm)
-
-plot(value_glm, "hist")
+bayesplot::ppc_dens_overlay(
+  y = multivariate_glm$y,
+  yrep = posterior_predict(
+    multivariate_glm,
+    draws = 50
+    )
+)
 
 ```
 
-## Multilevel Regression
+```{r glm-estimates}
+bayestestR::hdi(
+  multivariate_glm,
+  ci = c(
+    0.5, 0.75, 0.89, 0.95
+    )
+  ) %>%
+  plot()
 
-```{r mlm}
-fit1 <- brm(pts ~ log(value) + days_injured + num_players + league + (1|league),
-            data = model_df)
+multivariate_posterior <- as.matrix(multivariate_glm)
 
-bayesplot::mcmc_trace(fit1)
+bayestestR::map_estimate(
+  multivariate_posterior
+  ) %>%
+  plot()
+
 ```
 
-## Simulations
+# Hierarchical Modelling Structures
+
+## Varying Intercepts Model with No Predictors
+
+-   So the log(value) models perform slightly worse than the non-transformed models, in terms of $Loo R^2$. Is this because there is less variance to explain? I'm not sure what to make of this issue...
+
+```{r no-predictors}
+
+no_predictors_lmer <-
+  stan_lmer(pts ~ 1 + (1 | league),
+      data = model_df)  
+
+summary(no_predictors_lmer)
+
+no_predictors_R2 <- loo_R2(no_predictors_lmer)
+
+as_tibble(no_predictors_R2) %>%
+  ggplot(aes(value)) +
+  geom_density()
+
+```
+
+## Varying Intercepts Model with Squad Value Predictor
+
+```{r value-varying-intercepts}
+
+varying_intercepts_lmer <- 
+  stan_lmer(pts ~ value + (1|league), data = model_df)
+
+bayesplot::mcmc_trace(varying_intercepts_lmer)
+```
+
+## Varying Intercepts & Slopes Model
+
+```{r varying-intercepts-slopes}
+
+varying_intercepts_slopes_lmer <- 
+  stan_lmer(pts ~ log_value + league + (1|league), data = model_df)
+
+bayesplot::mcmc_trace(varying_intercepts_slopes_lmer)
+
+bayesplot::ppc_dens_overlay(
+  y = varying_intercepts_slopes_lmer$y,
+  yrep = posterior_predict(
+    varying_intercepts_slopes_lmer,
+    draws = 50
+    )
+)
+```
+
+## Varying Intercepts Model with Multiple Predictors
+
+```{r multivariable-varying-intercepts}
+
+multivariable_varying_intercepts_lmer <- 
+  stan_lmer(pts ~ log_value + weighted_injuries + (1|league), data = model_df)
+
+bayesplot::mcmc_trace(multivariable_varying_intercepts_lmer)
+
+bayesplot::ppc_dens_overlay(
+  y = multivariable_varying_intercepts_lmer$y,
+  yrep = posterior_predict(
+    multivariable_varying_intercepts_lmer,
+    draws = 50
+    )
+)
+
+prior_summary(multivariable_varying_intercepts_lmer)
+
+print(multivariable_varying_intercepts_lmer, digits = 2)
+```
+
+# Simulating Bundesliga Points Total Based on Club Resources
 
 ```{r sims}
 
