@@ -12,8 +12,6 @@ editor_options:
 suppressPackageStartupMessages({
   library(dplyr)
   library(ggplot2)
-  library(scales)
-  library(patchwork)
   library(rstanarm)
 })
 
