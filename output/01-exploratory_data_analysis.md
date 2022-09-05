@@ -14,8 +14,6 @@ club_resources %>%
   labs(x = "League Points", y = NULL)
 ```
 
-    `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-
 ![](01-exploratory_data_analysis_files/figure-gfm/pts-1.png)
 
 The distribution of points appears to be relatively normal with a longer
@@ -36,8 +34,6 @@ club_resources %>%
   scale_fill_viridis_d(guide = guide_legend(nrow = 1)) +
   labs(x = "League Points", y = NULL)
 ```
-
-    `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
 ![](01-exploratory_data_analysis_files/figure-gfm/league-pts-1.png)
 
@@ -66,22 +62,6 @@ club_resources %>%
   facet_wrap(~ league) +
   labs(x = "League Points", y = NULL)
 ```
-
-    Picking joint bandwidth of 6.88
-
-    Picking joint bandwidth of 6.52
-
-    Picking joint bandwidth of 7.04
-
-    Picking joint bandwidth of 7.42
-
-    Picking joint bandwidth of 6.47
-
-    Picking joint bandwidth of 8.65
-
-    Picking joint bandwidth of 6.82
-
-    Picking joint bandwidth of 8.75
 
 ![](01-exploratory_data_analysis_files/figure-gfm/season-pts-1.png)
 
@@ -176,8 +156,6 @@ club_resources %>%
   labs(x = NULL, y = NULL)
 ```
 
-    `geom_smooth()` using formula 'y ~ x'
-
 ![](01-exploratory_data_analysis_files/figure-gfm/transfer-spending-1.png)
 
 # Squad Depth
@@ -194,8 +172,6 @@ club_resources %>%
   labs(x = "League Points", y = "Players")
 ```
 
-    `geom_smooth()` using formula 'y ~ x'
-
 ![](01-exploratory_data_analysis_files/figure-gfm/squad-size-1.png)
 
 ## The Relationship Between Squad Depth & Points
@@ -209,8 +185,6 @@ club_resources %>%
   labs(x = "League Points", y = "Players")
 ```
 
-    `geom_smooth()` using formula 'y ~ x'
-
 ![](01-exploratory_data_analysis_files/figure-gfm/squad-size-pts-1.png)
 
 ``` r
@@ -222,8 +196,6 @@ club_resources %>%
   facet_wrap(~ league, scales = "free", nrow = 2) +
   labs(x = "League Points", y = "Players")
 ```
-
-    `geom_smooth()` using formula 'y ~ x'
 
 ![](01-exploratory_data_analysis_files/figure-gfm/squad-size-pts-2.png)
 
@@ -248,8 +220,6 @@ club_resources %>%
   labs(x = "League Points", y = "Squad Days Injured")
 ```
 
-    `geom_smooth()` using formula 'y ~ x'
-
 ![](01-exploratory_data_analysis_files/figure-gfm/injuries-1.png)
 
 # Squad Market Values
@@ -266,9 +236,6 @@ club_resources %>%
     ) +
   labs(x = NULL, y = "Squad Market Value")
 ```
-
-    `summarise()` has grouped output by 'league'. You can override using the
-    `.groups` argument.
 
 ![](01-exploratory_data_analysis_files/figure-gfm/squad-values-1.png)
 
@@ -288,20 +255,6 @@ club_resources %>%
   facet_wrap(~ league, scales = "free", nrow = 2) +
   labs(x = NULL, y = NULL)
 ```
-
-    Picking joint bandwidth of 49200000
-
-    Picking joint bandwidth of 12200000
-
-    Picking joint bandwidth of 60700000
-
-    Picking joint bandwidth of 35500000
-
-    Picking joint bandwidth of 1.12e+08
-
-    Picking joint bandwidth of 1.2e+07
-
-    Picking joint bandwidth of 69500000
 
 ![](01-exploratory_data_analysis_files/figure-gfm/values-over-time-1.png)
 
@@ -338,8 +291,6 @@ club_resources %>%
   labs(x = "League Points", y = "Squad Market Value")
 ```
 
-    `geom_smooth()` using formula 'y ~ x'
-
 ![](01-exploratory_data_analysis_files/figure-gfm/pts-and-values-1.png)
 
 ``` r
@@ -354,7 +305,5 @@ club_resources %>%
   facet_wrap(~ league, scales = "free", nrow = 2) +
   labs(x = "League Points", y = "Squad Market Value")
 ```
-
-    `geom_smooth()` using formula 'y ~ x'
 
 ![](01-exploratory_data_analysis_files/figure-gfm/pts-and-values-2.png)

@@ -6,6 +6,7 @@ format:
     fig-width: 12
     fig-height: 8
     fig-align: center
+    warning: false
     message: false
 editor_options: 
   chunk_output_type: console
@@ -23,7 +24,7 @@ suppressPackageStartupMessages({
 
 # plot theme
 # set minimal theme and specify font to (approximately) match GitHub & FTW
-theme_set(theme_minimal(base_family = "Inter")) +
+theme_set(theme_minimal(base_family = "Inter", base_size = 14)) +
   # update theme to configure legend and increase plot margin
   theme_update(
     legend.position = "top",
@@ -81,6 +82,7 @@ How do league points vary by season? Has there been a change in the way points a
 
 ```{r season-pts}
 #| fig-height: 9
+#| fig-width: 12.5
 
 club_resources %>%
   ggplot(aes(x = pts, y = forcats::as_factor(season), fill = league)) +
@@ -112,7 +114,7 @@ Because of these inconsistencies, there is no easy fix. If the post-restructurin
 
 As a result, I will drop the Austrian Bundesliga from the analysis, and move forward with the seven remaining leagues. An odd number... Like some sort of savage.
 
-```{r}
+```{r drop-austria}
 
 club_resources <- 
   club_resources %>%
@@ -216,6 +218,7 @@ club_resources %>%
 
 ```{r values-over-time}
 #| fig-height: 9
+#| fig-width: 12.5
 
 club_resources %>%
   ggplot(aes(x = value, y = forcats::as_factor(season), fill = league)) +
