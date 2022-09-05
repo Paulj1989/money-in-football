@@ -2,7 +2,7 @@
 title: "Generalized Linear Models - Regression Models as Building Blocks"
 author: "Paul Johnson"
 format:
-  html:
+  gfm:
     self-contained: true
     toc: true
     toc-location: left
