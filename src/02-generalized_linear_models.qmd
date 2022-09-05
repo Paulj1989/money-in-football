@@ -1,11 +1,7 @@
 ---
 title: "Generalized Linear Models - Regression Models as Building Blocks"
 author: "Paul Johnson"
-format:
-  gfm:
-    self-contained: true
-    toc: true
-    toc-location: left
+format: gfm
 editor_options: 
   chunk_output_type: console
 ---

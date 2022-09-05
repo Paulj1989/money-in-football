@@ -2,14 +2,6 @@ Generalized Linear Models - Regression Models as Building Blocks
 ================
 Paul Johnson
 
-- <a href="#preparing-data-for-modelling"
-  id="toc-preparing-data-for-modelling">Preparing Data for Modelling</a>
-- <a href="#simple-linear-model-with-squad-value-predictor"
-  id="toc-simple-linear-model-with-squad-value-predictor">Simple Linear
-  Model with Squad Value Predictor</a>
-- <a href="#multiple-linear-regression"
-  id="toc-multiple-linear-regression">Multiple Linear Regression</a>
-
 # Preparing Data for Modelling
 
 - Removing the Austrian Bundesliga due to issues with data quality
@@ -56,8 +48,8 @@ glm1 <- stan_glm(pts ~ log_value, data = model_df)
 
     SAMPLING FOR MODEL 'continuous' NOW (CHAIN 1).
     Chain 1: 
-    Chain 1: Gradient evaluation took 2.4e-05 seconds
-    Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.24 seconds.
+    Chain 1: Gradient evaluation took 0.000126 seconds
+    Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 1.26 seconds.
     Chain 1: Adjust your expectations accordingly!
     Chain 1: 
     Chain 1: 
@@ -74,15 +66,15 @@ glm1 <- stan_glm(pts ~ log_value, data = model_df)
     Chain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)
     Chain 1: Iteration: 2000 / 2000 [100%]  (Sampling)
     Chain 1: 
-    Chain 1:  Elapsed Time: 0.028211 seconds (Warm-up)
-    Chain 1:                0.136106 seconds (Sampling)
-    Chain 1:                0.164317 seconds (Total)
+    Chain 1:  Elapsed Time: 0.025288 seconds (Warm-up)
+    Chain 1:                0.147871 seconds (Sampling)
+    Chain 1:                0.173159 seconds (Total)
     Chain 1: 
 
     SAMPLING FOR MODEL 'continuous' NOW (CHAIN 2).
     Chain 2: 
-    Chain 2: Gradient evaluation took 9e-06 seconds
-    Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.09 seconds.
+    Chain 2: Gradient evaluation took 1.6e-05 seconds
+    Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.16 seconds.
     Chain 2: Adjust your expectations accordingly!
     Chain 2: 
     Chain 2: 
@@ -99,9 +91,9 @@ glm1 <- stan_glm(pts ~ log_value, data = model_df)
     Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
     Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
     Chain 2: 
-    Chain 2:  Elapsed Time: 0.020322 seconds (Warm-up)
-    Chain 2:                0.125202 seconds (Sampling)
-    Chain 2:                0.145524 seconds (Total)
+    Chain 2:  Elapsed Time: 0.02779 seconds (Warm-up)
+    Chain 2:                0.170386 seconds (Sampling)
+    Chain 2:                0.198176 seconds (Total)
     Chain 2: 
 
     SAMPLING FOR MODEL 'continuous' NOW (CHAIN 3).
@@ -124,9 +116,9 @@ glm1 <- stan_glm(pts ~ log_value, data = model_df)
     Chain 3: Iteration: 1800 / 2000 [ 90%]  (Sampling)
     Chain 3: Iteration: 2000 / 2000 [100%]  (Sampling)
     Chain 3: 
-    Chain 3:  Elapsed Time: 0.02 seconds (Warm-up)
-    Chain 3:                0.123659 seconds (Sampling)
-    Chain 3:                0.143659 seconds (Total)
+    Chain 3:  Elapsed Time: 0.023245 seconds (Warm-up)
+    Chain 3:                0.126281 seconds (Sampling)
+    Chain 3:                0.149526 seconds (Total)
     Chain 3: 
 
     SAMPLING FOR MODEL 'continuous' NOW (CHAIN 4).
@@ -149,9 +141,9 @@ glm1 <- stan_glm(pts ~ log_value, data = model_df)
     Chain 4: Iteration: 1800 / 2000 [ 90%]  (Sampling)
     Chain 4: Iteration: 2000 / 2000 [100%]  (Sampling)
     Chain 4: 
-    Chain 4:  Elapsed Time: 0.01995 seconds (Warm-up)
-    Chain 4:                0.122744 seconds (Sampling)
-    Chain 4:                0.142694 seconds (Total)
+    Chain 4:  Elapsed Time: 0.020221 seconds (Warm-up)
+    Chain 4:                0.12915 seconds (Sampling)
+    Chain 4:                0.149371 seconds (Total)
     Chain 4: 
 
 ``` r
@@ -182,7 +174,7 @@ value_R2 <- loo_R2(glm1)
 median(value_R2)
 ```
 
-    [1] 0.4753535
+    [1] 0.4754757
 
 ``` r
 as_tibble(value_R2) %>%
@@ -212,8 +204,8 @@ glm2 <- stan_glm(pts ~ value + days_injured + num_players, data = model_df)
 
     SAMPLING FOR MODEL 'continuous' NOW (CHAIN 1).
     Chain 1: 
-    Chain 1: Gradient evaluation took 2.3e-05 seconds
-    Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.23 seconds.
+    Chain 1: Gradient evaluation took 2.2e-05 seconds
+    Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.22 seconds.
     Chain 1: Adjust your expectations accordingly!
     Chain 1: 
     Chain 1: 
@@ -230,15 +222,15 @@ glm2 <- stan_glm(pts ~ value + days_injured + num_players, data = model_df)
     Chain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)
     Chain 1: Iteration: 2000 / 2000 [100%]  (Sampling)
     Chain 1: 
-    Chain 1:  Elapsed Time: 0.031506 seconds (Warm-up)
-    Chain 1:                0.158653 seconds (Sampling)
-    Chain 1:                0.190159 seconds (Total)
+    Chain 1:  Elapsed Time: 0.035508 seconds (Warm-up)
+    Chain 1:                0.170851 seconds (Sampling)
+    Chain 1:                0.206359 seconds (Total)
     Chain 1: 
 
     SAMPLING FOR MODEL 'continuous' NOW (CHAIN 2).
     Chain 2: 
-    Chain 2: Gradient evaluation took 1.2e-05 seconds
-    Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.12 seconds.
+    Chain 2: Gradient evaluation took 1.5e-05 seconds
+    Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.15 seconds.
     Chain 2: Adjust your expectations accordingly!
     Chain 2: 
     Chain 2: 
@@ -255,15 +247,15 @@ glm2 <- stan_glm(pts ~ value + days_injured + num_players, data = model_df)
     Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
     Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
     Chain 2: 
-    Chain 2:  Elapsed Time: 0.028296 seconds (Warm-up)
-    Chain 2:                0.154114 seconds (Sampling)
-    Chain 2:                0.18241 seconds (Total)
+    Chain 2:  Elapsed Time: 0.032657 seconds (Warm-up)
+    Chain 2:                0.155947 seconds (Sampling)
+    Chain 2:                0.188604 seconds (Total)
     Chain 2: 
 
     SAMPLING FOR MODEL 'continuous' NOW (CHAIN 3).
     Chain 3: 
-    Chain 3: Gradient evaluation took 1.7e-05 seconds
-    Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 0.17 seconds.
+    Chain 3: Gradient evaluation took 2.8e-05 seconds
+    Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 0.28 seconds.
     Chain 3: Adjust your expectations accordingly!
     Chain 3: 
     Chain 3: 
@@ -280,15 +272,15 @@ glm2 <- stan_glm(pts ~ value + days_injured + num_players, data = model_df)
     Chain 3: Iteration: 1800 / 2000 [ 90%]  (Sampling)
     Chain 3: Iteration: 2000 / 2000 [100%]  (Sampling)
     Chain 3: 
-    Chain 3:  Elapsed Time: 0.034296 seconds (Warm-up)
-    Chain 3:                0.160165 seconds (Sampling)
-    Chain 3:                0.194461 seconds (Total)
+    Chain 3:  Elapsed Time: 0.026695 seconds (Warm-up)
+    Chain 3:                0.142572 seconds (Sampling)
+    Chain 3:                0.169267 seconds (Total)
     Chain 3: 
 
     SAMPLING FOR MODEL 'continuous' NOW (CHAIN 4).
     Chain 4: 
-    Chain 4: Gradient evaluation took 1.3e-05 seconds
-    Chain 4: 1000 transitions using 10 leapfrog steps per transition would take 0.13 seconds.
+    Chain 4: Gradient evaluation took 1e-05 seconds
+    Chain 4: 1000 transitions using 10 leapfrog steps per transition would take 0.1 seconds.
     Chain 4: Adjust your expectations accordingly!
     Chain 4: 
     Chain 4: 
@@ -305,9 +297,9 @@ glm2 <- stan_glm(pts ~ value + days_injured + num_players, data = model_df)
     Chain 4: Iteration: 1800 / 2000 [ 90%]  (Sampling)
     Chain 4: Iteration: 2000 / 2000 [100%]  (Sampling)
     Chain 4: 
-    Chain 4:  Elapsed Time: 0.031274 seconds (Warm-up)
-    Chain 4:                0.14902 seconds (Sampling)
-    Chain 4:                0.180294 seconds (Total)
+    Chain 4:  Elapsed Time: 0.028433 seconds (Warm-up)
+    Chain 4:                0.14414 seconds (Sampling)
+    Chain 4:                0.172573 seconds (Total)
     Chain 4: 
 
 ``` r
@@ -338,7 +330,7 @@ print(glm2)
 median(loo_R2(glm2))
 ```
 
-    [1] 0.5133331
+    [1] 0.5144224
 
 ``` r
 as_tibble(loo_R2(glm2)) %>%
