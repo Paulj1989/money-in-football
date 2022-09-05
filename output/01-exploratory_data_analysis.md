@@ -33,13 +33,8 @@ seasons aggregates to a level that risks missing some important detail.
 club_resources %>%
   ggplot(aes(pts, fill = league)) +
   geom_histogram() +
-  scale_fill_viridis_d() +
-  labs(x = "League Points", y = NULL) +
-  theme(
-    legend.position = "top",
-    legend.title = element_blank()
-  ) + 
-  guides(fill = guide_legend(nrow = 1))
+  scale_fill_viridis_d(guide = guide_legend(nrow = 1)) +
+  labs(x = "League Points", y = NULL)
 ```
 
     `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -50,10 +45,9 @@ club_resources %>%
 club_resources %>%
   ggplot(aes(pts, fill = league)) +
   geom_histogram(binwidth = 5) +
-  scale_fill_viridis_d() +
+  scale_fill_viridis_d(guide = guide_legend(nrow = 1)) +
   facet_wrap(~ league) +
-  labs(x = "League Points", y = NULL) +
-  theme(legend.position = "none")
+  labs(x = "League Points", y = NULL)
 ```
 
 ![](01-exploratory_data_analysis_files/figure-gfm/league-pts-2.png)
@@ -68,12 +62,9 @@ points are distributed over time?
 club_resources %>%
   ggplot(aes(x = pts, y = forcats::as_factor(season), fill = league)) +
   ggridges::geom_density_ridges() +
-  scale_fill_viridis_d() +
+  scale_fill_viridis_d(guide = guide_legend(nrow = 1)) +
   facet_wrap(~ league) +
-  labs(x = "League Points", y = NULL) +
-  theme(
-    legend.position = "none"
-  )
+  labs(x = "League Points", y = NULL)
 ```
 
     Picking joint bandwidth of 6.88
@@ -169,11 +160,10 @@ club_resources <-
 
 ``` r
 club_resources %>%
-  filter(season != 2022) %>%
   ggplot(aes(pts, net_spend, colour = league)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
-  scale_colour_viridis_d() +
+  scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   scale_y_continuous(
     labels = label_number(
       style_positive = "plus",
@@ -183,12 +173,7 @@ club_resources %>%
       )
     ) +
   facet_wrap(~ league, scales = "free", nrow = 2) +
-  labs(x = NULL, y = NULL) +
-  theme(
-    legend.position = "top",
-    legend.title = element_blank()
-  ) + 
-  guides(colour = guide_legend(nrow = 1))
+  labs(x = NULL, y = NULL)
 ```
 
     `geom_smooth()` using formula 'y ~ x'
@@ -203,7 +188,6 @@ club_resources %>%
 
 ``` r
 club_resources %>%
-  filter(season != 2022) %>%
   ggplot(aes(pts, num_players)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
@@ -218,17 +202,11 @@ club_resources %>%
 
 ``` r
 club_resources %>%
-  filter(season != 2022) %>%
   ggplot(aes(pts, num_players, colour = league)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
-  scale_colour_viridis_d() +
-  labs(x = "League Points", y = "Players") +
-  theme(
-    legend.position = "top",
-    legend.title = element_blank()
-  ) + 
-  guides(colour = guide_legend(nrow = 1))
+  scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
+  labs(x = "League Points", y = "Players")
 ```
 
     `geom_smooth()` using formula 'y ~ x'
@@ -237,18 +215,12 @@ club_resources %>%
 
 ``` r
 club_resources %>%
-  filter(season != 2022) %>%
   ggplot(aes(pts, num_players, colour = league)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
-  scale_colour_viridis_d() +
+  scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   facet_wrap(~ league, scales = "free", nrow = 2) +
-  labs(x = "League Points", y = "Players") +
-  theme(
-    legend.position = "top",
-    legend.title = element_blank()
-  ) + 
-  guides(colour = guide_legend(nrow = 1))
+  labs(x = "League Points", y = "Players")
 ```
 
     `geom_smooth()` using formula 'y ~ x'
@@ -268,18 +240,12 @@ club_resources %>%
 
 ``` r
 club_resources %>%
-  filter(season != 2022) %>%
   ggplot(aes(pts, days_injured, colour = league)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
-  scale_colour_viridis_d() +
+  scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   facet_wrap(~ league, scales = "free", nrow = 2) +
-  labs(x = "League Points", y = "Squad Days Injured") +
-  theme(
-    legend.position = "top",
-    legend.title = element_blank()
-  ) + 
-  guides(colour = guide_legend(nrow = 1))
+  labs(x = "League Points", y = "Squad Days Injured")
 ```
 
     `geom_smooth()` using formula 'y ~ x'
@@ -294,16 +260,11 @@ club_resources %>%
   summarise(value = median(value)) %>%
   ggplot(aes(forcats::as_factor(season), value, group = league, fill = league)) +
   geom_col(position = "dodge") +
-  scale_fill_viridis_d() +
+  scale_fill_viridis_d(guide = guide_legend(nrow = 1)) +
   scale_y_continuous(
     labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
     ) +
-  labs(x = NULL, y = "Squad Market Value") +
-  theme(
-    legend.position = "top",
-    legend.title = element_blank()
-  ) + 
-  guides(fill = guide_legend(nrow = 1))
+  labs(x = NULL, y = "Squad Market Value")
 ```
 
     `summarise()` has grouped output by 'league'. You can override using the
@@ -317,7 +278,7 @@ club_resources %>%
 club_resources %>%
   ggplot(aes(x = value, y = forcats::as_factor(season), fill = league)) +
   ggridges::geom_density_ridges() +
-  scale_fill_viridis_d() +
+  scale_fill_viridis_d(guide = guide_legend(nrow = 1)) +
   scale_x_continuous(
     labels = label_number(
       scale_cut = cut_short_scale(),
@@ -325,12 +286,7 @@ club_resources %>%
       )
     ) +
   facet_wrap(~ league, scales = "free", nrow = 2) +
-  labs(x = NULL, y = NULL) +
-  theme(
-    legend.position = "top",
-    legend.title = element_blank()
-  ) + 
-  guides(fill = guide_legend(nrow = 1))
+  labs(x = NULL, y = NULL)
 ```
 
     Picking joint bandwidth of 49200000
@@ -375,16 +331,11 @@ club_resources %>%
   ggplot(aes(pts, value, colour = league)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
-  scale_colour_viridis_d() +
+  scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   scale_y_continuous(
     labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
     ) +
-  labs(x = "League Points", y = "Squad Market Value") +
-  theme(
-    legend.position = "top",
-    legend.title = element_blank()
-  ) + 
-  guides(colour = guide_legend(nrow = 1))
+  labs(x = "League Points", y = "Squad Market Value")
 ```
 
     `geom_smooth()` using formula 'y ~ x'
@@ -396,17 +347,12 @@ club_resources %>%
   ggplot(aes(pts, value, colour = league)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
-  scale_colour_viridis_d() +
+  scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   scale_y_continuous(
     labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
     ) +
   facet_wrap(~ league, scales = "free", nrow = 2) +
-    labs(x = "League Points", y = "Squad Market Value") +
-  theme(
-    legend.position = "top",
-    legend.title = element_blank()
-  ) + 
-  guides(colour = guide_legend(nrow = 1))
+  labs(x = "League Points", y = "Squad Market Value")
 ```
 
     `geom_smooth()` using formula 'y ~ x'

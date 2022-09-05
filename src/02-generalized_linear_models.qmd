@@ -1,7 +1,12 @@
 ---
 title: "Generalized Linear Models - Regression Models as Building Blocks"
 author: "Paul Johnson"
-format: gfm
+format: 
+  gfm:
+    fig-width: 12
+    fig-height: 8
+    fig-align: center
+    message: false
 editor_options: 
   chunk_output_type: console
 ---
@@ -9,7 +14,7 @@ editor_options:
 ```{r setup}
 #| include: false
 
-#packages
+# packages
 suppressPackageStartupMessages({
   library(dplyr)
   library(ggplot2)
@@ -17,9 +22,15 @@ suppressPackageStartupMessages({
 })
 
 # plot theme
-# font to (approximately) match GitHub markdown output and FTW article body
-theme_set(theme_minimal(base_family = "Inter"))
-# font to match my personal website
+# set minimal theme and specify font to (approximately) match GitHub & FTW
+theme_set(theme_minimal(base_family = "Inter")) +
+  # update theme to configure legend and increase plot margin
+  theme_update(
+    legend.position = "top",
+    legend.title = element_blank(),
+    plot.margin = unit(c(0.5, 1, 1, 1), "cm")
+    ) 
+# set minimal theme and specify font to match my personal website
 # theme_set(theme_minimal(base_family = "Jet Brains Mono"))
 bayesplot::color_scheme_set("teal")
 
