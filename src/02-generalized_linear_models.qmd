@@ -17,10 +17,10 @@ suppressPackageStartupMessages({
 })
 
 # plot theme
-# font to (approximately) match github markdown output and my website
-theme_set(theme_minimal(base_family = "Jet Brains Mono"))
-# font to match FTW article body
-# theme_set(theme_minimal(base_family = "Inter"))
+# font to (approximately) match GitHub markdown output and FTW article body
+theme_set(theme_minimal(base_family = "Inter"))
+# font to match my personal website
+# theme_set(theme_minimal(base_family = "Jet Brains Mono"))
 bayesplot::color_scheme_set("teal")
 
 # data
