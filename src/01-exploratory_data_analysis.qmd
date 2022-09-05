@@ -9,14 +9,20 @@ editor_options:
 ```{r setup}
 #| include: false
 
+# packages
 suppressPackageStartupMessages({
   library(dplyr)
   library(ggplot2)
   library(scales)
 })
 
-theme_set(theme_minimal())
+# plot theme
+# font to (approximately) match github markdown output and my website
+theme_set(theme_minimal(base_family = "Jet Brains Mono"))
+# font to match FTW article body
+# theme_set(theme_minimal(base_family = "Inter"))
 
+# data
 club_resources <- readr::read_rds(here::here("data", "club_resources.rds"))
 
 ```

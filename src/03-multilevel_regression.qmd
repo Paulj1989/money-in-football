@@ -7,6 +7,8 @@ editor_options:
 ---
 
 ```{r setup}
+
+# packages
 suppressPackageStartupMessages({
   library(dplyr)
   library(ggplot2)
@@ -14,8 +16,14 @@ suppressPackageStartupMessages({
   library(rstanarm)
 })
 
-theme_set(theme_minimal())
+# plot theme
+# font to (approximately) match github markdown output and my website
+theme_set(theme_minimal(base_family = "Jet Brains Mono"))
+# font to match FTW article body
+# theme_set(theme_minimal(base_family = "Inter"))
+bayesplot::color_scheme_set("teal")
 
+# data
 club_resources <- readr::read_rds(here::here("data", "club_resources.rds"))
 
 ```
