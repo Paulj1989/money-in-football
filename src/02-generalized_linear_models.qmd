@@ -1,0 +1,136 @@
+---
+title: "Generalized Linear Models - Regression Models as Building Blocks"
+author: "Paul Johnson"
+format:
+  html:
+    self-contained: true
+    toc: true
+    toc-location: left
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+#| include: false
+
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(ggplot2)
+  library(scales)
+  library(patchwork)
+  library(rstanarm)
+})
+
+theme_set(theme_minimal())
+
+club_resources <- readr::read_rds(here::here("data", "club_resources.rds"))
+
+```
+
+# Preparing Data for Modelling
+
+-   Removing the Austrian Bundesliga due to issues with data quality
+-   Some basic transformations and type changes to make sure the data is ready for modelling
+
+```{r data-prep}
+
+club_resources <-
+  club_resources %>%
+  filter(league != "Austrian Bundesliga") %>%
+  mutate(
+    weighted_injuries = days_injured/num_players,
+    log_value = log(value)
+  )
+
+model_df <- 
+  club_resources %>%
+  mutate(
+    league = forcats::as_factor(league),
+    season = forcats::as_factor(season),
+    squad = forcats::as_factor(squad),
+    log_value = (log_value - mean(log_value))/sd(log_value),
+    value = (value - mean(value))/sd(value),
+    pts = (pts - mean(pts))/sd(pts),
+    net_spend = (net_spend - mean(net_spend))/sd(net_spend),
+    num_players = (num_players - mean(num_players))/sd(num_players),
+    days_injured = (days_injured - mean(days_injured))/sd(days_injured),
+    weighted_injuries = (weighted_injuries - mean(weighted_injuries))/sd(weighted_injuries)
+    )
+
+```
+
+# Simple Linear Model with Squad Value Predictor
+
+I should probably give these models more informative names, but the naming structure is going to lead to some very long model names and that irritates me in an entirely irrational way, so instead I've plucked for the much less informative and objectively bad choice that doesn't annoy me.
+
+```{r simple-glm}
+
+glm1 <- stan_glm(pts ~ log_value, data = model_df)
+
+print(glm1)
+
+value_R2 <- loo_R2(glm1)
+
+median(value_R2)
+
+as_tibble(value_R2) %>%
+  ggplot(aes(value)) +
+  geom_density() +
+  labs(x = expression("LOO R"^2), y = NULL)
+
+```
+
+The LOO $R^2$ is much better for the regression including squad values than the intercept only regression. This is to be expected, but it does help to check these things!
+
+The multivariate regression including all potential explanatory variables is also a little better than the model that only contains the squad values as a predictor.  The improvement isn't huge, but it's significant enough to suggest there's value in including some of those variables.
+
+# Multiple Linear Regression
+
+```{r multivariable-glm}
+
+glm2 <- stan_glm(pts ~ value + days_injured + num_players, data = model_df)
+
+print(glm2)
+
+median(loo_R2(glm2))
+
+as_tibble(loo_R2(glm2)) %>%
+  ggplot(aes(value)) +
+  geom_density() +
+  labs(x = expression("LOO R"^2), y = NULL)
+
+```
+
+We can also carry out some diagnostic checks and some posterior predictive checks.
+
+```{r glm-diagnostics}
+
+bayesplot::mcmc_trace(glm2) 
+
+bayesplot::ppc_dens_overlay(
+  y = glm2$y,
+  yrep = posterior_predict(
+    glm2,
+    draws = 100
+    )
+)
+
+```
+
+```{r glm-estimates}
+bayestestR::hdi(
+  glm2,
+  ci = c(
+    0.5, 0.75, 0.89, 0.95
+    )
+  ) %>%
+  plot()
+
+multivariate_posterior <- as.matrix(glm2)
+
+bayestestR::map_estimate(
+  multivariate_posterior
+  ) %>%
+  plot()
+
+```
