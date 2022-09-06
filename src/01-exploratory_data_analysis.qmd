@@ -1,18 +1,10 @@
 ---
 title: "Exploratory Data Analysis - Visualizing the Untold Riches in Football"
 author: "Paul Johnson"
-format: 
-  gfm:
-    fig-width: 12
-    fig-height: 8
-    fig-align: center
-    warning: false
-    message: false
-editor_options: 
-  chunk_output_type: console
 ---
 
-```{r setup}
+```{r}
+#| label: setup
 #| include: false
 
 # packages
@@ -43,7 +35,8 @@ club_resources <- readr::read_rds(here::here("data", "club_resources.rds"))
 
 The first step in understanding how club resources effects league performance is exploring the data.
 
-```{r pts}
+```{r}
+#| label: pts
 
 club_resources %>%
   ggplot(aes(pts)) +
@@ -58,7 +51,8 @@ The distribution of points appears to be relatively normal with a longer right t
 
 Visualizing the distribution of all points totals across leagues and seasons aggregates to a level that risks missing some important detail. 
 
-```{r league-pts}
+```{r}
+#| label: league-pts
 
 club_resources %>%
   ggplot(aes(pts, fill = league)) +
@@ -80,7 +74,8 @@ However, facetting the points distributions by league demonstrates that all of t
 
 How do league points vary by season? Has there been a change in the way points are distributed over time?
 
-```{r season-pts}
+```{r}
+#| label: season-pts
 #| fig-height: 9
 #| fig-width: 12.5
 
@@ -97,7 +92,8 @@ For seven of the eight leagues there doesn't appear to be any interesting change
 
 ### The Austria Problem
 
-```{r austria-season-pts}
+```{r}
+#| label: austria-pts
 
 club_resources %>%
   filter(league == "Austrian Bundesliga") %>%
@@ -114,7 +110,8 @@ Because of these inconsistencies, there is no easy fix. If the post-restructurin
 
 As a result, I will drop the Austrian Bundesliga from the analysis, and move forward with the seven remaining leagues. An odd number... Like some sort of savage.
 
-```{r drop-austria}
+```{r}
+#| label: drop-austria
 
 club_resources <- 
   club_resources %>%
@@ -124,7 +121,8 @@ club_resources <-
 
 # Net Transfer Spending
 
-```{r transfer-spending}
+```{r}
+#| label: transfer-spending
 
 club_resources %>%
   ggplot(aes(pts, net_spend, colour = league)) +
@@ -148,7 +146,8 @@ club_resources %>%
 
 -   The number of players seems to have a negative correlation with points (this is itself relatively interesting), but I suspect it is a relevant control variable.
 
-```{r squad-size}
+```{r}
+#| label: squad-size
 
 club_resources %>%
   ggplot(aes(pts, num_players)) +
@@ -160,7 +159,8 @@ club_resources %>%
 
 ## The Relationship Between Squad Depth & Points
 
-```{r squad-size-pts}
+```{r}
+#| label: squad-size-pts
 
 club_resources %>%
   ggplot(aes(pts, num_players, colour = league)) +
@@ -185,7 +185,8 @@ club_resources %>%
 
 -   As a result, I've used days_injured instead, which is an imperfect measure of the effect injuries have on a team, but at least will not be a function of a team's success in non-league competitions.
 
-```{r injuries}
+```{r}
+#| label: injuries
 
 club_resources %>%
   ggplot(aes(pts, days_injured, colour = league)) +
@@ -199,7 +200,8 @@ club_resources %>%
 
 # Squad Market Values
 
-```{r squad-values}
+```{r}
+#| label: squad-values
 
 club_resources %>%
   group_by(league, season) %>%
@@ -216,7 +218,8 @@ club_resources %>%
 
 ## Distributions of Squad Values Across Leagues
 
-```{r values-over-time}
+```{r}
+#| label: values-over-time
 #| fig-height: 9
 #| fig-width: 12.5
 
@@ -245,7 +248,8 @@ club_resources %>%
 
 -   When log-transformed, there doesn't appear to be a massive difference in the slopes of each league, except for the Austrian Bundesliga, and Ligue 1. However, I'm not sure the difference is big enough to make it worth modelling varying slopes.
 
-```{r pts-and-values}
+```{r}
+#| label: pts-and-values
   
 club_resources %>%
   ggplot(aes(pts, value, colour = league)) +

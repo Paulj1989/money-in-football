@@ -2,6 +2,28 @@ Exploratory Data Analysis - Visualizing the Untold Riches in Football
 ================
 Paul Johnson
 
+- <a href="#points-totals" id="toc-points-totals">Points Totals</a>
+  - <a href="#points-distributions-across-leagues"
+    id="toc-points-distributions-across-leagues">Points Distributions Across
+    Leagues</a>
+    - <a href="#the-austria-problem" id="toc-the-austria-problem">The Austria
+      Problem</a>
+- <a href="#net-transfer-spending" id="toc-net-transfer-spending">Net
+  Transfer Spending</a>
+- <a href="#squad-depth" id="toc-squad-depth">Squad Depth</a>
+  - <a href="#the-relationship-between-squad-depth-points"
+    id="toc-the-relationship-between-squad-depth-points">The Relationship
+    Between Squad Depth &amp; Points</a>
+- <a href="#injuries" id="toc-injuries">Injuries</a>
+- <a href="#squad-market-values" id="toc-squad-market-values">Squad Market
+  Values</a>
+  - <a href="#distributions-of-squad-values-across-leagues"
+    id="toc-distributions-of-squad-values-across-leagues">Distributions of
+    Squad Values Across Leagues</a>
+  - <a href="#the-relationship-between-squad-value-points"
+    id="toc-the-relationship-between-squad-value-points">The Relationship
+    Between Squad Value &amp; Points</a>
+
 # Points Totals
 
 The first step in understanding how club resources effects league
