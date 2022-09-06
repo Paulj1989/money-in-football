@@ -11,3 +11,15 @@ I've put together an analysis looking to answer that question, using Bayesian mu
 - Ligue 1 (France)
 - Eredivisie (Netherlands)
 - Primeira Liga (Portugal)
+
+## Project Structure
+
+## Links
+
+## License
+
+This repository and all of its contents are licensed under the [MIT license](LICENSE.md).
+
+## Contact
+
+If you have any questions or comments, feel free to contact [me](https://paulrjohnson.net) by [email](mailto:paul@paulrjohnson.net) or on [Twitter](https://twitter.com/paul_johnson89).
