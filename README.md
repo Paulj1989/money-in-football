@@ -11,5 +11,3 @@ I've put together an analysis looking to answer that question, using Bayesian mu
 - Ligue 1 (France)
 - Eredivisie (Netherlands)
 - Primeira Liga (Portugal)
-
-$\tau$
