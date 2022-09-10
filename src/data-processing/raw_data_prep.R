@@ -1,3 +1,5 @@
+# Script for pulling and combining raw data from FB Ref and Transfermarkt
+
 library(worldfootballR)
 library(dplyr)
 
@@ -961,6 +963,22 @@ fb_combined <-
   full_join(league_tables, num_players)
 
 club_resources <- full_join(fb_combined, tm_combined)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Create Seasons from Years ----
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+club_resources <- 
+  club_resources %>%
+  mutate(
+    season =
+      forcats::as_factor(
+        paste0(
+          season, "/", 
+          as.numeric(stringr::str_sub(season, start = -2)) + 1
+        )
+      )
+  )
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Save Final Dataset ----
