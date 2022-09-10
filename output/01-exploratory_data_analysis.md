@@ -23,6 +23,9 @@ Paul Johnson
   - <a href="#the-relationship-between-squad-value-points"
     id="toc-the-relationship-between-squad-value-points">The Relationship
     Between Squad Value &amp; Points</a>
+    - <a href="#the-variance-in-relationship-over-time"
+      id="toc-the-variance-in-relationship-over-time">The Variance in
+      Relationship Over Time</a>
 
 # Points Totals
 
@@ -78,7 +81,7 @@ points are distributed over time?
 
 ``` r
 club_resources %>%
-  ggplot(aes(x = pts, y = forcats::as_factor(season), fill = league)) +
+  ggplot(aes(x = pts, y = season, fill = league)) +
   ggridges::geom_density_ridges() +
   scale_fill_viridis_d(guide = guide_legend(nrow = 1)) +
   facet_wrap(~ league) +
@@ -102,18 +105,18 @@ club_resources %>%
 ```
 
     # A tibble: 10 × 2
-       season   pts
-        <dbl> <dbl>
-     1   2012  46.5
-     2   2013  45.5
-     3   2014  48  
-     4   2015  45.5
-     5   2016  46  
-     6   2017  48.5
-     7   2018  41  
-     8   2019  40  
-     9   2020  29.5
-    10   2021  29.5
+       season    pts
+       <fct>   <dbl>
+     1 2012/13  46.5
+     2 2013/14  45.5
+     3 2014/15  48  
+     4 2015/16  45.5
+     5 2016/17  46  
+     6 2017/18  48.5
+     7 2018/19  41  
+     8 2019/20  40  
+     9 2020/21  29.5
+    10 2021/22  29.5
 
 The average points drop after 2017/18, from around 45-48 points to
 around 40 for a couple seasons, and then below 30 for the last two
@@ -329,3 +332,40 @@ club_resources %>%
 ```
 
 ![](01-exploratory_data_analysis_files/figure-gfm/pts-and-values-2.png)
+
+### The Variance in Relationship Over Time
+
+Time doesn’t appear to have an impact the intercepts in any meaningful
+way, but it clearly has a role to play in the slope in each league. This
+makes sense. Each season is a more or less separate entity, and over
+time, as bigger teams have increasingly high value teams, the way that
+points are distributed chagnes, and the role that money plays changes.
+
+``` r
+club_resources %>%
+  ggplot(aes(pts, value, colour = season)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
+  scale_y_continuous(
+    labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
+    ) +
+  labs(x = "League Points", y = "Squad Market Value")
+```
+
+![](01-exploratory_data_analysis_files/figure-gfm/pts-and-values-by-season-1.png)
+
+``` r
+club_resources %>%
+  ggplot(aes(pts, value, colour = season)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
+  scale_y_continuous(
+    labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
+    ) +
+  facet_wrap(~ league, scales = "free", nrow = 2) +
+  labs(x = "League Points", y = "Squad Market Value")
+```
+
+![](01-exploratory_data_analysis_files/figure-gfm/pts-and-values-by-season-2.png)

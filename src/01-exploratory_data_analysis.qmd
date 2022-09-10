@@ -28,7 +28,7 @@ theme_set(theme_minimal(base_family = "Inter", base_size = 14)) +
 
 # data
 club_resources <- readr::read_rds(here::here("data", "club_resources.rds"))
-
+  
 ```
 
 # Points Totals
@@ -80,7 +80,7 @@ How do league points vary by season? Has there been a change in the way points a
 #| fig-width: 12.5
 
 club_resources %>%
-  ggplot(aes(x = pts, y = forcats::as_factor(season), fill = league)) +
+  ggplot(aes(x = pts, y = season, fill = league)) +
   ggridges::geom_density_ridges() +
   scale_fill_viridis_d(guide = guide_legend(nrow = 1)) +
   facet_wrap(~ league) +
@@ -263,6 +263,37 @@ club_resources %>%
 
 club_resources %>%
   ggplot(aes(pts, value, colour = league)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
+  scale_y_continuous(
+    labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
+    ) +
+  facet_wrap(~ league, scales = "free", nrow = 2) +
+  labs(x = "League Points", y = "Squad Market Value")
+
+```
+
+### The Variance in Relationship Over Time
+
+Time doesn't appear to have an impact the intercepts in any meaningful way, but it clearly has a role to play in the slope in each league. This makes sense. Each season is a more or less separate entity, and over time, as bigger teams have increasingly high value teams, the way that points are distributed chagnes, and the role that money plays changes.
+
+```{r}
+#| label: pts-and-values-by-season
+
+club_resources %>%
+  ggplot(aes(pts, value, colour = season)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
+  scale_y_continuous(
+    labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
+    ) +
+  labs(x = "League Points", y = "Squad Market Value")
+
+
+club_resources %>%
+  ggplot(aes(pts, value, colour = season)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
