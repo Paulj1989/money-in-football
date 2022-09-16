@@ -163,11 +163,33 @@ club_resources <-
 
 # Net Transfer Spending
 
+I know that points should be on the y-axis, because it is the dependent
+variable, here but the plots are harder to read when I do that, so I’m
+committing data visualization sins in service to **aesthetics**. But
+either way, I’m clearly plotting a line through a mess here.
+
+Perhaps the only interesting bit we can take from this is the fact that
+a higher net spend is (loosely) associated with a higher points total in
+the top five leagues, while Eredivisie and Primeira Liga seem to have
+the opposite association. This will be because big teams in these
+leagues (Ajax, PSV Eindhoven, Benfica etc.) will often sell players on
+to teams in the bigger leagues for lots of money, but still win their
+leagues because of their significant talent advantage.
+
+If someone was looking to do something interesting with net spend, it
+might be worth investigating how the previous season’s points totals
+connected to net spend. But in this case, it doesn’t appear to be
+particularly useful, so I will stick with squad value instead.
+
 ``` r
 club_resources %>%
   ggplot(aes(pts, net_spend, colour = league)) +
+  geom_hline(
+    aes(yintercept = 0),
+    size = 1, colour = "gray30", linetype = "dashed"
+    ) +
   geom_point(alpha = 0.6, size = 1.5) +
-  geom_smooth(method = lm,  se = FALSE, size = 1.5, alpha = 0.8) +
+  geom_smooth(method = lm, se = FALSE, size = 1.5, alpha = 0.8) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   scale_y_continuous(
     labels = label_number(
@@ -185,19 +207,19 @@ club_resources %>%
 
 # Squad Depth
 
-- The number of players seems to have a negative correlation with points
-  (this is itself relatively interesting), but I suspect it is a
-  relevant control variable.
+The number of players seems to have a negative correlation with points
+(this is itself relatively interesting), but I suspect it might be a
+relevant control variable.
 
 ``` r
 club_resources %>%
-  ggplot(aes(pts, num_players)) +
+  ggplot(aes(num_players, pts)) +
   geom_point(alpha = 0.6, size = 1.5, colour = "gray30") +
   geom_smooth(
     method = lm, formula = y ~ splines::bs(x),
     se = FALSE, size = 1.5, alpha = 0.6
     ) +
-  labs(x = "League Points", y = "Players")
+  labs(x = "Players", y = "League Points")
 ```
 
 ![](01-exploratory_data_analysis_files/figure-gfm/squad-size-1.png)
@@ -206,46 +228,47 @@ club_resources %>%
 
 ``` r
 club_resources %>%
-  ggplot(aes(pts, num_players, colour = league)) +
+  ggplot(aes(num_players, pts, colour = league)) +
   geom_point(alpha = 0.6, size = 1.5) +
   geom_smooth(method = lm,  se = FALSE, size = 1.5, alpha = 0.6) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
-  labs(x = "League Points", y = "Players")
+  labs(x = "Players", y = "League Points")
 ```
 
 ![](01-exploratory_data_analysis_files/figure-gfm/squad-size-pts-1.png)
 
 ``` r
 club_resources %>%
-  ggplot(aes(pts, num_players, colour = league)) +
+  ggplot(aes(num_players, pts, colour = league)) +
   geom_point(alpha = 0.6, size = 1.5) +
   geom_smooth(method = lm, se = FALSE, size = 1.5, alpha = 0.8) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   facet_wrap(~ league, scales = "free", nrow = 2) +
-  labs(x = "League Points", y = "Players")
+  labs(x = "Players", y = "League Points")
 ```
 
 ![](01-exploratory_data_analysis_files/figure-gfm/squad-size-pts-2.png)
 
 # Injuries
 
-- The number of games missed through injury is clearly a function of the
-  number of games a team plays each season, and because the injury data
-  appears to include **all** games missed, not just league games, there
-  is a positive relationship between points and games missed to injury.
+The total number of games missed through injury is clearly a function of
+the number of games a team plays each season, and because the injury
+data appears to include **all** games missed, not just league games,
+there is a positive relationship between points and games missed to
+injury. As a result, I’ve used `days_injured` instead, which is an
+imperfect measure of the effect injuries have on a team, but at least
+will not be a function of a team’s success in non-league competitions.
 
-- As a result, I’ve used days_injured instead, which is an imperfect
-  measure of the effect injuries have on a team, but at least will not
-  be a function of a team’s success in non-league competitions.
+But it’s not telling us a whole lot on anyway…
 
 ``` r
 club_resources %>%
-  ggplot(aes(pts, days_injured, colour = league)) +
+  ggplot(aes(days_injured, pts, colour = league)) +
   geom_point(alpha = 0.6, size = 1.5) +
   geom_smooth(method = lm, se = FALSE, size = 1.5, alpha = 0.8) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   facet_wrap(~ league, scales = "free", nrow = 2) +
-  labs(x = "League Points", y = "Squad Days Injured")
+  labs(x = "Squad Days Injured", y = "League Points")
 ```
 
 ![](01-exploratory_data_analysis_files/figure-gfm/injuries-1.png)
@@ -269,6 +292,9 @@ club_resources %>%
 
 ## Distributions of Squad Values Across Leagues
 
+You can see the within-league disparity in squad values growing over the
+course of the decade, especially in the Premier League and Serie A.
+
 ``` r
 club_resources %>%
   ggplot(aes(x = value, y = forcats::as_factor(season), fill = league)) +
@@ -288,54 +314,44 @@ club_resources %>%
 
 ## The Relationship Between Squad Value & Points
 
-- One of the most noticeable details that you can identify from the EDA
-  is that there appears to be not only a different intercept for each
-  league, but also the slope differs too. This is not entirely
-  surprising, but it wasn’t my initial working assumption. I was
-  starting from an assumption that the differences would be based on
-  leagues having different intercepts.
+One of the most noticeable details here is that there appears to be not
+only a different intercept for each league, but also the slope differs
+too. This is not entirely surprising, but it wasn’t my initial working
+assumption. I was starting from an assumption that the differences would
+be based on leagues having different intercepts.
 
-- Is there also a non-linear trend in certain leagues? There does look
-  like there might be an exponential relationship between market value
-  and points. This may exist across all leagues, it’s just that some
-  league don’t have such large disparities that that trend shows up?
-
-- I need to facet the leagues to look at them individually as well.
-
-- When log-transformed, there doesn’t appear to be a massive difference
-  in the slopes of each league, except for the Austrian Bundesliga, and
-  Ligue 1. However, I’m not sure the difference is big enough to make it
-  worth modelling varying slopes.
+I’ve added splines to the faceted plots to account for some of the
+non-linearity in the trend in certain leagues. I’m not sure that this is
+necessarily significant enough that I need to go to great lengths to
+incorporate it into the analysis, though I do need to consider it.
 
 ``` r
 club_resources %>%
-  ggplot(aes(pts, value, colour = league)) +
+  ggplot(aes(value, pts, colour = league)) +
   geom_point(alpha = 0.6, size = 1.5) +
-  geom_smooth(
-    method = lm, formula = y ~ splines::bs(x),
-    se = FALSE, size = 1.5, alpha = 0.6) +
+  geom_smooth(method = lm, se = FALSE, size = 1.5, alpha = 0.6) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
-  scale_y_continuous(
+  scale_x_continuous(
     labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
     ) +
-  labs(x = "League Points", y = "Squad Market Value")
+  labs(x = "Squad Market Value", y = "League Points")
 ```
 
 ![](01-exploratory_data_analysis_files/figure-gfm/pts-and-values-1.png)
 
 ``` r
 club_resources %>%
-  ggplot(aes(pts, value, colour = league)) +
+  ggplot(aes(value, pts, colour = league)) +
   geom_point(alpha = 0.4, size = 1.5, colour = "gray30") +
   geom_smooth(
     method = lm, formula = y ~ splines::bs(x),
     se = FALSE, size = 1.5, alpha = 0.6) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
-  scale_y_continuous(
+  scale_x_continuous(
     labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
     ) +
   facet_wrap(~ league, scales = "free", nrow = 2) +
-  labs(x = "League Points", y = "Squad Market Value")
+  labs(x = "Squad Market Value", y = "League Points")
 ```
 
 ![](01-exploratory_data_analysis_files/figure-gfm/pts-and-values-2.png)
@@ -346,37 +362,60 @@ Time doesn’t appear to have an impact the intercepts in any meaningful
 way, but it clearly has a role to play in the slope in each league. This
 makes sense. Each season is a more or less separate entity, and over
 time, as bigger teams have increasingly high value teams, the way that
-points are distributed chagnes, and the role that money plays changes.
+points are distributed changes, and the role that money plays changes.
 
 ``` r
 club_resources %>%
-  ggplot(aes(pts, value, colour = season)) +
+  ggplot(aes(value, pts, colour = season)) +
   geom_point(alpha = 0.6, size = 1.5) +
   geom_smooth(
-    method = lm, formula = y ~ splines::bs(x),
+    method = lm, 
     se = FALSE, size = 1.5, alpha = 0.6) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
-  scale_y_continuous(
+  scale_x_continuous(
     labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
     ) +
-  labs(x = "League Points", y = "Squad Market Value")
+  labs(x = "Squad Market Value", y = "League Points")
 ```
 
 ![](01-exploratory_data_analysis_files/figure-gfm/pts-and-values-by-season-1.png)
 
 ``` r
 club_resources %>%
-  ggplot(aes(pts, value, colour = season)) +
+  ggplot(aes(value, pts, colour = season)) +
   geom_point(alpha = 0.4, size = 1.5, colour = "gray30") +
   geom_smooth(
     method = lm, formula = y ~ splines::bs(x),
     se = FALSE, size = 1, alpha = 0.6) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
-  scale_y_continuous(
+  scale_x_continuous(
     labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
     ) +
   facet_wrap(~ league, scales = "free", nrow = 2) +
-  labs(x = "League Points", y = "Squad Market Value")
+  labs(x = "Squad Market Value", y = "League Points")
 ```
 
 ![](01-exploratory_data_analysis_files/figure-gfm/pts-and-values-by-season-2.png)
+
+#### Time is Weird
+
+If we add splines to the previous facet plot, we create a weird sea
+creature. It doesn’t help us draw a ton of inference from the data, but
+it looks nice, doesn’t it? I am a fully grown adult scientist.
+
+``` r
+club_resources %>%
+  ggplot(aes(value, pts, colour = season)) +
+  geom_point(alpha = 0.4, size = 1.5, colour = "gray30") +
+  geom_smooth(
+    method = lm, formula = y ~ splines::bs(x),
+    se = FALSE, size = 1, alpha = 0.6) +
+  scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
+  scale_x_continuous(
+    labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
+    ) +
+  facet_wrap(~ league, scales = "free", nrow = 2) +
+  labs(x = "Squad Market Value", y = "League Points")
+```
+
+![](01-exploratory_data_analysis_files/figure-gfm/weird-splines-1.png)
