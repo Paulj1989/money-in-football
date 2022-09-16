@@ -65,7 +65,7 @@ club_resources %>%
 ``` r
 club_resources %>%
   ggplot(aes(pts, fill = league)) +
-  geom_histogram(alpha = 0.8, binwidth = 5) +
+  geom_histogram(binwidth = 5) +
   scale_fill_viridis_d(guide = guide_legend(nrow = 1)) +
   facet_wrap(~ league) +
   labs(x = "League Points", y = NULL)
@@ -307,7 +307,8 @@ club_resources %>%
       )
     ) +
   facet_wrap(~ league, scales = "free", nrow = 2) +
-  labs(x = NULL, y = NULL)
+  labs(x = NULL, y = NULL) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 ```
 
 ![](01-exploratory_data_analysis_files/figure-gfm/values-over-time-1.png)
@@ -351,7 +352,8 @@ club_resources %>%
     labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
     ) +
   facet_wrap(~ league, scales = "free", nrow = 2) +
-  labs(x = "Squad Market Value", y = "League Points")
+  labs(x = "Squad Market Value", y = "League Points") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 ```
 
 ![](01-exploratory_data_analysis_files/figure-gfm/pts-and-values-2.png)
@@ -368,9 +370,7 @@ points are distributed changes, and the role that money plays changes.
 club_resources %>%
   ggplot(aes(value, pts, colour = season)) +
   geom_point(alpha = 0.6, size = 1.5) +
-  geom_smooth(
-    method = lm, 
-    se = FALSE, size = 1.5, alpha = 0.6) +
+  geom_smooth(method = lm, se = FALSE, size = 1.5, alpha = 0.6) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   scale_x_continuous(
     labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
@@ -384,15 +384,14 @@ club_resources %>%
 club_resources %>%
   ggplot(aes(value, pts, colour = season)) +
   geom_point(alpha = 0.4, size = 1.5, colour = "gray30") +
-  geom_smooth(
-    method = lm, formula = y ~ splines::bs(x),
-    se = FALSE, size = 1, alpha = 0.6) +
+  geom_smooth(method = lm, se = FALSE, size = 1, alpha = 0.6) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   scale_x_continuous(
     labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
     ) +
   facet_wrap(~ league, scales = "free", nrow = 2) +
-  labs(x = "Squad Market Value", y = "League Points")
+  labs(x = "Squad Market Value", y = "League Points") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 ```
 
 ![](01-exploratory_data_analysis_files/figure-gfm/pts-and-values-by-season-2.png)
@@ -409,13 +408,15 @@ club_resources %>%
   geom_point(alpha = 0.4, size = 1.5, colour = "gray30") +
   geom_smooth(
     method = lm, formula = y ~ splines::bs(x),
-    se = FALSE, size = 1, alpha = 0.6) +
+    se = FALSE, size = 1, alpha = 0.6
+    ) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   scale_x_continuous(
     labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
     ) +
   facet_wrap(~ league, scales = "free", nrow = 2) +
-  labs(x = "Squad Market Value", y = "League Points")
+  labs(x = "Squad Market Value", y = "League Points") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 ```
 
 ![](01-exploratory_data_analysis_files/figure-gfm/weird-splines-1.png)

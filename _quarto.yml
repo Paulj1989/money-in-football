@@ -10,8 +10,8 @@ format:
   gfm:
     toc: true
     toc-depth: 3
-    fig-width: 12
-    fig-height: 8
+    fig-width: 12.5
+    fig-height: 9
     fig-align: center
     warning: false
 
