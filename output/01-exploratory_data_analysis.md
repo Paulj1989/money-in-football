@@ -65,7 +65,7 @@ club_resources %>%
 ``` r
 club_resources %>%
   ggplot(aes(pts, fill = league)) +
-  geom_histogram(binwidth = 5) +
+  geom_histogram(alpha = 0.8, binwidth = 5) +
   scale_fill_viridis_d(guide = guide_legend(nrow = 1)) +
   facet_wrap(~ league) +
   labs(x = "League Points", y = NULL)
@@ -82,7 +82,7 @@ points are distributed over time?
 ``` r
 club_resources %>%
   ggplot(aes(x = pts, y = season, fill = league)) +
-  ggridges::geom_density_ridges() +
+  ggridges::geom_density_ridges(alpha = 0.8) +
   scale_fill_viridis_d(guide = guide_legend(nrow = 1)) +
   facet_wrap(~ league) +
   labs(x = "League Points", y = NULL)
@@ -166,8 +166,8 @@ club_resources <-
 ``` r
 club_resources %>%
   ggplot(aes(pts, net_spend, colour = league)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_point(alpha = 0.6, size = 1.5) +
+  geom_smooth(method = lm,  se = FALSE, size = 1.5, alpha = 0.8) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   scale_y_continuous(
     labels = label_number(
@@ -192,8 +192,11 @@ club_resources %>%
 ``` r
 club_resources %>%
   ggplot(aes(pts, num_players)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_point(alpha = 0.6, size = 1.5, colour = "gray30") +
+  geom_smooth(
+    method = lm, formula = y ~ splines::bs(x),
+    se = FALSE, size = 1.5, alpha = 0.6
+    ) +
   labs(x = "League Points", y = "Players")
 ```
 
@@ -204,8 +207,8 @@ club_resources %>%
 ``` r
 club_resources %>%
   ggplot(aes(pts, num_players, colour = league)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_point(alpha = 0.6, size = 1.5) +
+  geom_smooth(method = lm,  se = FALSE, size = 1.5, alpha = 0.6) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   labs(x = "League Points", y = "Players")
 ```
@@ -215,8 +218,8 @@ club_resources %>%
 ``` r
 club_resources %>%
   ggplot(aes(pts, num_players, colour = league)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_point(alpha = 0.6, size = 1.5) +
+  geom_smooth(method = lm, se = FALSE, size = 1.5, alpha = 0.8) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   facet_wrap(~ league, scales = "free", nrow = 2) +
   labs(x = "League Points", y = "Players")
@@ -238,8 +241,8 @@ club_resources %>%
 ``` r
 club_resources %>%
   ggplot(aes(pts, days_injured, colour = league)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_point(alpha = 0.6, size = 1.5) +
+  geom_smooth(method = lm, se = FALSE, size = 1.5, alpha = 0.8) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   facet_wrap(~ league, scales = "free", nrow = 2) +
   labs(x = "League Points", y = "Squad Days Injured")
@@ -269,7 +272,7 @@ club_resources %>%
 ``` r
 club_resources %>%
   ggplot(aes(x = value, y = forcats::as_factor(season), fill = league)) +
-  ggridges::geom_density_ridges() +
+  ggridges::geom_density_ridges(alpha = 0.8) +
   scale_fill_viridis_d(guide = guide_legend(nrow = 1)) +
   scale_x_continuous(
     labels = label_number(
@@ -307,8 +310,10 @@ club_resources %>%
 ``` r
 club_resources %>%
   ggplot(aes(pts, value, colour = league)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_point(alpha = 0.6, size = 1.5) +
+  geom_smooth(
+    method = lm, formula = y ~ splines::bs(x),
+    se = FALSE, size = 1.5, alpha = 0.6) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   scale_y_continuous(
     labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
@@ -321,8 +326,10 @@ club_resources %>%
 ``` r
 club_resources %>%
   ggplot(aes(pts, value, colour = league)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_point(alpha = 0.4, size = 1.5, colour = "gray30") +
+  geom_smooth(
+    method = lm, formula = y ~ splines::bs(x),
+    se = FALSE, size = 1.5, alpha = 0.6) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   scale_y_continuous(
     labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
@@ -344,8 +351,10 @@ points are distributed chagnes, and the role that money plays changes.
 ``` r
 club_resources %>%
   ggplot(aes(pts, value, colour = season)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_point(alpha = 0.6, size = 1.5) +
+  geom_smooth(
+    method = lm, formula = y ~ splines::bs(x),
+    se = FALSE, size = 1.5, alpha = 0.6) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   scale_y_continuous(
     labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
@@ -358,8 +367,10 @@ club_resources %>%
 ``` r
 club_resources %>%
   ggplot(aes(pts, value, colour = season)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_point(alpha = 0.4, size = 1.5, colour = "gray30") +
+  geom_smooth(
+    method = lm, formula = y ~ splines::bs(x),
+    se = FALSE, size = 1, alpha = 0.6) +
   scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
   scale_y_continuous(
     labels = label_number(scale_cut = cut_short_scale(), prefix = "€")
