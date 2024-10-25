@@ -1,0 +1,250 @@
+---
+title: Analysing Money's Effect on Football Using Multilevel Regression
+---
+
+```{r}
+#| label: setup
+#| output: false
+#| code-fold: true
+#| code-summary: 'Setup Code (Click to Expand)'
+
+# import packages
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(lme4)
+  library(gt)
+  library(ggplot2)
+  library(marginaleffects)
+})
+
+# setup fonts
+sysfonts::font_add_google("Poppins")
+sysfonts::font_add_google("Lora")
+showtext::showtext_auto()
+
+# set plot theme
+# inspired by https://github.com/z3tt/TidyTuesday/blob/main/R/2020_31_PalmerPenguins.Rmd
+theme_set(theme_minimal(base_size = 20, base_family = "Poppins")) +
+  theme_update(
+    panel.grid.major = element_line(color = "grey90", linewidth = .4),
+    panel.grid.minor = element_blank(),
+    panel.spacing.x = unit(.65, units = "cm"),
+    panel.spacing.y = unit(.3, units = "cm"),
+    axis.title.x = element_text(
+      color = "grey30", margin = margin(t = 5), size = rel(1.05)
+      ),
+    axis.title.y = element_text(
+      color = "grey30", margin = margin(r = 5), size = rel(1.05)
+      ),
+    axis.text = element_text(color = "grey50", size = rel(1)),
+    axis.text.x = element_text(angle = 30, vjust = 1, hjust = .75),
+    axis.ticks = element_line(color = "grey90", linewidth = .4),
+    axis.ticks.length = unit(.2, "lines"),
+    legend.position = "top",
+    legend.title = element_blank(),
+    legend.text = element_text(size = rel(.9)),
+    legend.box.margin = margin(0, 0, -10, 0),
+    legend.key.width = unit(1, units = "cm"),
+    plot.title = element_text(
+      hjust = 0, color = "black", family = "Lora",
+      size = rel(1.5), margin = margin(t = 5, b = 5)
+    ),
+    plot.subtitle = element_text(
+      hjust = 0, color = "grey30", family = "Lora",
+      lineheight = 0.5, size = rel(1.1), 
+      margin = margin(5, 0, 5, 0)
+    ),
+    plot.title.position = "plot",
+    plot.caption = element_text(
+      color = "grey50", size = rel(0.8), hjust = 1,
+      margin = margin(10, 0, 0, 0)
+    ),
+    plot.caption.position = "plot",
+    plot.margin = margin(rep(10, 4)),
+    strip.text = element_text(size = rel(1), margin = margin(0, 0, 5, 0)),
+    strip.clip = "off"
+  )
+
+# set table theme
+tbl_theme <-
+  function(data, width = 100, alignment = "center") {
+    data |>
+      tab_source_note(
+        source_note = "Source: FBref & Transfermarkt Via {worldfootballR}"
+        ) |>
+      tab_options(
+        footnotes.marks = "standard",
+        footnotes.spec_ref = "^xb", 
+        footnotes.spec_ftr = "(x)",
+        table.width = pct(width), 
+        table.align = alignment,
+        table.font.names = "Poppins"
+        ) |> 
+      tab_style(
+        style = cell_text(align = "left"),
+        locations = list(cells_source_notes(), cells_footnotes())
+        )
+  }
+
+# load data
+club_resources <- 
+  readr::read_rds(here::here("data", "club_resources.rds"))
+```
+
+
+```{r}
+
+club_resources |> 
+  group_by(league, season) |> 
+  summarise(squad_value = median(squad_value)) |> 
+  ggplot(aes(forcats::as_factor(season), squad_value, group = league, fill = league)) +
+  geom_col(position = "dodge", colour = "#343a40") +
+  geom_hline(yintercept = 0, colour = "#343a40") +
+  scale_fill_viridis_d(guide = guide_legend(nrow = 1)) +
+  scale_y_continuous(
+    labels = 
+      scales::label_number(scale_cut = scales::cut_short_scale(), prefix = "€")
+    ) +
+  labs(
+    title = "Squad Value in Europe's Biggest Leagues Over Time",
+      subtitle =
+      stringr::str_wrap(
+        glue::glue(
+          "Median average Transfermarkt squad market values per season in each of the ",
+          "seven biggest leagues in Europe from 2012/13 - 2023/24."
+          ),
+        width = 93
+        ),
+    x = NULL, y = "Squad Value",
+    caption = 
+      "Visualisation: Paul Johnson | Data: Transfermarkt Via {worldfootballR}"
+    ) +
+  theme(legend.key.width = unit(.8, units = "cm"))
+```
+
+```{r}
+#| label: fit-models
+#| code-fold: true
+#| code-summary: 'Model Code (Click to Expand)'
+
+regression_data <-
+  club_resources |>
+  mutate(
+    squad_value = log(squad_value),
+    mean_club = mean(squad_value),
+    demean_squad = squad_value - mean_club,
+    .by = squad
+  ) |> 
+  mutate(
+    double_mean_club = mean_club - mean(squad_value),
+    ppg = pts/mp,
+    time = as.numeric(season) - 1
+  )
+
+model <-
+  lmer(
+    ppg ~ 1 + demean_squad + double_mean_club + time +
+      (1 + demean_squad | league/squad) + (1 | season),
+    data = regression_data, REML = TRUE,
+    control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 200000))
+    )
+```
+
+```{r}
+#| label: tbl-model-summary
+#| tbl-cap: |
+#|    Multilevel Regressions of Squad Values' Effect on Season Outcomes
+#| code-fold: true
+#| code-summary: 'Table Code (Click to Expand)'
+
+cm <-
+  c(
+    "(Intercept)" = "(Intercept)",
+    "demean_squad" = "Squad Value",
+    "double_mean_club" = "Club Mean Value",
+    "time" = "Time (Seasons)",
+    "SD (Intercept squadleague)" = "_Club_: Intercept Std. Dev.",
+    "SD (demean_squad squadleague)" = "_Club_: Slope Std. Dev.",
+    "SD (Intercept league)" = "_League_: Intercept Std. Dev.",
+    "SD (demean_squad league)" = "_League_: Slope Std. Dev.",
+    "SD (Intercept season)" = "_Season_: Intercept Std. Dev.",
+    "SD (Observations)" = "Residual Std. Dev."
+  )
+
+gm <- 
+  list(
+    list("raw" = "nobs", "clean" = "Num. Obs", "fmt" = 0),
+    list("raw" = "r2.marginal", "clean" = "R<sup>2</sup> Marginal", "fmt" = 2),
+    list("raw" = "r2.conditional", "clean" = "R<sup>2</sup> Conditional", "fmt" = 2),
+    list("raw" = "icc", "clean" = "ICC", "fmt" = 2),
+    list("raw" = "rmse", "clean" = "RMSE", "fmt" = 2)
+    )
+
+modelsummary::msummary(
+    list("Points (Per Game)" = model),
+    statistic = 'conf.int', gof_map = gm, coef_map = cm, fmt = 2, output = "gt"
+    ) |> 
+  tab_row_group(label = md("**Group Effects**"), rows = 9:14) |>
+  tab_row_group(label = md("**Population-Level Effects**"), rows = 1:8) |> 
+  tab_footnote(
+    footnote = "Integers 0-11 (2012/13 = 0; 2022/23 = 11)",
+    locations = cells_body(columns = 1, rows = 7)
+    ) |> 
+  tab_footnote(
+    footnote = "Log-transformed",
+    locations = cells_body(columns = 1, rows = c(3, 5))
+    ) |>
+  tab_footnote(
+    footnote = "Group mean centred",
+    locations = cells_body(columns = 1, rows = 3)
+    ) |> 
+  tab_footnote(
+    footnote = "Grand mean centred",
+    locations = cells_body(columns = 1, rows = 5)
+    ) |> 
+  fmt_markdown(columns = 1, rows = 9:17) |> 
+  tab_style(
+    style = cell_text(size = "small"),
+    locations = cells_body(columns = 2, rows = c(2, 4, 6, 8))
+    ) |>
+  tbl_theme()
+```
+
+```{r}
+
+predictions(model = model, by = c("demean_squad", "double_mean_club", "league")) |> 
+  mutate(
+    across(c(double_mean_club, demean_squad), ~ as.numeric(as.character(.x))),
+    double_mean_club = double_mean_club + mean(log(club_resources$squad_value)),
+    squad_value = exp(demean_squad + double_mean_club),
+    estimate = case_when(
+        league %in% c("Bundesliga", "Ligue 1", "Primeira Liga", "Eredivisie") ~ estimate * 34,
+        league %in% c("Premier League", "La Liga", "Serie A") ~ estimate * 38
+        )
+  ) |> 
+  ggplot(aes(squad_value, estimate, colour = league)) +
+  geom_smooth(
+    method = lm, formula = y ~ log(x), se = FALSE, alpha = .8, linewidth = 1
+    ) +
+  scale_colour_viridis_d(guide = guide_legend(nrow = 1)) +
+  scale_x_continuous(
+    labels = 
+      scales::label_number(scale_cut = scales::cut_short_scale(), prefix = "€")
+    ) +
+  labs(
+    title = "Predicted Points by Squad Value in Europe's Biggest Leagues",
+    subtitle =
+      stringr::str_wrap(
+        glue::glue(
+          "Marginal adjusted predicted league points, averaged over squad ",
+          "market values in each of the seven biggest leagues in Europe from 2008/09 ",
+          "- 2023/24. Predicted points calculated by multiplying points per game ",
+          "by the total games in each league's season."
+          ),
+        width = 95
+        ),
+    x = "Squad Value", y = "Predicted Points",
+    caption =
+      "Visualisation: Paul Johnson | Data: FBref & Transfermarkt Via {worldfootballR}"
+  )
+```
